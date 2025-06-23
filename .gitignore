@@ -1,0 +1,95 @@
+# ===================================================================
+#      通用 C++ 项目的 .gitignore 文件
+# ===================================================================
+
+# 操作系统生成的文件
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# 编译产物
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dll
+*.dylib
+*.exe
+*.out
+*.app
+
+# 预编译头文件
+*.gch
+*.pch
+
+# 构建目录
+# 常见的构建目录名，如 build, bin, lib 等
+build/
+bin/
+lib/
+
+# CMake 生成的文件
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CMakeLists.txt.user
+CTestTestfile.cmake
+compile_commands.json
+
+# Makefile 生成的文件
+Makefile
+*.mk
+
+# Visual Studio / MSVC
+.vs/
+*.sln.dotstates
+*.suo
+*.user
+*.vcxproj.user
+Debug/
+Release/
+x64/
+Win32/
+ipch/
+*.aps
+*.ncb
+*.opensdf
+*.sdf
+*.tlog
+*.log
+
+# VS Code
+.vscode/
+# 注意：.vscode/ 文件夹中可能包含 launch.json 和 tasks.json 等
+# 对于团队协作有用的文件。如果你的团队需要共享调试和任务配置，
+# 可以删除上面的 `.vscode/`，然后添加以下两行来只忽略用户设置：
+# .vscode/settings.json
+# .vscode/c_cpp_properties.json
+
+# CLion (JetBrains)
+.idea/
+cmake-build-*/
+
+# Qt Creator
+*.pro.user
+*.pro.user.*
+
+# 日志和临时文件
+*.log
+*.tmp
+*.temp
+*~
+
+# 崩溃转储文件
+*.dmp
+core.*
+
+# 包管理器 (例如 vcpkg, conan)
+vcpkg/
+vcpkg_installed/
+conanbuildinfo.cmake
