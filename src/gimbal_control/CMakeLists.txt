@@ -1,0 +1,5 @@
+set(GIMBAL_CONTROLLER_SOURCES GimbalController.cpp)
+add_library(gimbalcontroller SHARED  ${GIMBAL_CONTROLLER_SOURCES})
+set_property(TARGET gimbalcontroller PROPERTY POSITION_INDEPENDENT_CODE ON)
+target_include_directories(gimbalcontroller PUBLIC .)
+target_link_libraries(gimbalcontroller PUBLIC tinympc Eigen3::Eigen)

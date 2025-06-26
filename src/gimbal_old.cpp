@@ -25,7 +25,7 @@ constexpr TinyType RHO_VALUE = 5.0;
 const TinyType DT_SIM =
     0.005;  // 被控系统（plant）的仿真步长 (MATLAB: dtsolve = dtreal*timefactor = 1/200 * 4 = 0.02)
 const TinyType DT_SOLVE =
-    0.02;  // MPC求解步长 (MATLAB: dtsolve = dtreal*timefactor = 1/200 * 4 = 0.02)
+    0.015;  // MPC求解步长 (MATLAB: dtsolve = dtreal*timefactor = 1/200 * 4 = 0.02)
 
 // 状态转移矩阵 A [2x2] (MATLAB: system.A2)
 // A = [1, dt; 0, 1]
@@ -38,7 +38,7 @@ const TinyType BDYN_DATA[N_STATES * N_INPUTS] = {0.5 * DT_SOLVE * DT_SOLVE, DT_S
 const TinyType BDYN_DATA_SIM[N_STATES * N_INPUTS] = {0.5 * DT_SIM * DT_SIM, DT_SIM};
 
 // 状态代价权重 Q (对角线元素) [2x1] (MATLAB: Q = 10*eye(1) -> 惩罚第一个状态)
-const TinyType Q_DATA[N_STATES] = {10000000.0, 0.001};
+const TinyType Q_DATA[N_STATES] = {100000000.0, 0.001};
 
 // 输入代价权重 R (对角线元素) [1x1] (MATLAB: R = 0*eye(1))
 const TinyType R_DATA[N_INPUTS] = {0.001};
@@ -120,18 +120,21 @@ void generate_reference_trajectory(TinyMatrix& x_ref_out, const TrajectoryParams
 
     for (int i = 0; i < N_HORIZON; ++i) {
         const double t = i * dt;
+        //angleToCam:目标装甲板-目标车中心-自身中心夹角
         double angleToCam = params.yawToCam + rotate_speed_flytime_offset + params.rotateSpeed * t;
         const int m_hitNumYaw =
             std::abs(floor((rotateDir * angleToCam + cycangle_half) / params.cycangle));
         const double Rcar = (m_hitNumYaw & 1) ? params.RcarNext : params.Rcar;
+        //归到中央
         angleToCam = angleToCam - rotateDir * m_hitNumYaw * params.cycangle;
+        //angleGoalPos_base:目标车中心-目标装甲板-自身中心夹角
         const double angleGoalPos_base = getAngleToGimbal(angleToCam, Rcar, params.dist);
-
+        //到目标装甲板距离
         const double disttoTargetArmor_sq =
             Rcar * Rcar + dist_sq + 2 * Rcar * params.dist * cos(angleGoalPos_base);
         const double disttoTargetArmor = sqrt(disttoTargetArmor_sq);
 
-        // 计算角速度
+        // 计算投影到中央的角速度
         double angleGoalSpeed =
             params.linearspeed *
             sin(asin(params.dist / disttoTargetArmor * sin(angleToCam)) + M_PI_2);
@@ -196,7 +199,7 @@ bool calculate_ShootFlag(const TinyMatrix& predicted_trajectory,
         sqrt(Rcar * Rcar + params.dist * params.dist + 2 * Rcar * params.dist * cos(angleGoalPos));
     const double armorWidth = isLargeArmor ? 0.23 : 0.135;
     const double armorProjectLen = cos(angleGoalPos + angleToCam) * (armorWidth / 2.0);
-    // 击打阈值，可视情况放缩
+    // 通过距离和目标倾斜角度计算击打阈值yaw，可视情况放缩
     const double shootYawThreshold = atan(armorProjectLen / disttoTargetArmor) * 1.0;
 
     // 6. 比较误差和阈值，返回决策
@@ -242,13 +245,13 @@ int main(int argc, char** argv) {
     double Rcar = 0.2;
     double RcarNext = 0.3;
     double rotateSpeed = 6;
-    double PosX = -0.5;  //来自滤波器
-    double SpdX = 0.5;
-    double PosZ = 2;  //来自滤波器
-    double SpdZ = -0;
+    double PosX = 0;  //来自滤波器
+    double SpdX = 0;
+    double PosZ = 1;  //来自滤波器
+    double SpdZ = 0;
     double PosYaw = 0;  //来自滤波器
     double flyspeed = 20;
-    double actiontime = 0.00;  //打蛋延迟
+    double actiontime = 0.1;  //打蛋延迟
     try {
         auto solverPtr = std::make_unique<TinyMpcSolver>(
             adyn, bdyn, q_diag.asDiagonal(), r_diag.asDiagonal(), x_min, x_max, u_min, u_max,
@@ -283,7 +286,6 @@ int main(int argc, char** argv) {
             TinyMatrix u_ref = TinyMatrix::Zero(N_INPUTS, N_HORIZON - 1);
 
             // ---- 4. 设置问题并求解 ----
-            //补全系统状态输入
             TinyVector x0 = x_current;
             solverPtr->setInitialState(x0);
             solverPtr->setStateReference(x_ref);
@@ -291,14 +293,13 @@ int main(int argc, char** argv) {
 
             int status = solverPtr->solve();
 
-            // ---- 5. 获取并打印结果 ----
+            // ---- 5. 获取结果 ----
             const TinySolution& solution = solverPtr->getSolution();
 
             double timetohit = actiontime + traj_params.flytime;
             // 从状态轨迹第一维插值计算timetohit时的位置
             bool shoot_flag = calculate_ShootFlag(solution.x, x_ref, traj_params, actiontime,
                                                   DT_SOLVE, N_HORIZON, 0);
-            std::cout << "shoot_flag =" << shoot_flag << std::endl;
             // 计时结束并计算耗时
             auto end_time = std::chrono::high_resolution_clock::now();
             auto duration =
@@ -330,7 +331,7 @@ int main(int argc, char** argv) {
                 RcarNext = swap;
                 PosYaw = PosYaw - (M_PI / 2.0);
             }
-            //在这里补全被控系统模拟
+            //被控系统模拟
             TinyVector u0 = solution.u.col(0);
             // std::cout << "solution.u = " << solution.u << std::endl;
             // std::cout << "solution.x = " << solution.x << std::endl;
