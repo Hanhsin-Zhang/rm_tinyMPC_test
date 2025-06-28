@@ -308,9 +308,9 @@ class GimbalController {
      * @author hitcrt (hitcrt@xxx.com)
      */
     double calculateFlyTimeNorm(const TargetParams& params, double timeDelay);
-
+#ifndef USE_EXTERNAL_BALLISTIC_CALCULATOR
     /**
-     * @brief 计算抬枪补偿后的Pitch角度
+     * @brief 计算抬枪补偿后的Pitch角度(仅在独立模式下使用)
      * @param y 目标高度 (m)
      * @param dist 水平距离 (m)
      * @param flySpeed 弹速 (m/s)
@@ -320,14 +320,14 @@ class GimbalController {
     double calculateFirePitchRad(double y, double dist, double flySpeed);
 
     /**
-     * @brief 计算目标Yaw角度
+     * @brief 计算目标Yaw角度(仅在独立模式下使用)
      * @param x 目标X坐标 (m)
      * @param z 目标Z坐标 (m)
      * @return double 需要的Yaw角度 (rad)
      * @author hitcrt (hitcrt@xxx.com)
      */
     double calculateFireYawRad(double x, double z);
-
+#endif
     /**
      * @brief 修正角度，处理-PI到+PI的跳变问题
      * @param lastYaw 上一时刻的角度 (rad)

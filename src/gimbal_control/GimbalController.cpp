@@ -17,7 +17,11 @@
 #include <cassert>
 #include <cmath>
 #include <iostream>
-
+// 根据编译宏，决定包含哪个头文件
+#ifdef USE_EXTERNAL_BALLISTIC_CALCULATOR
+// 假设 BallisticPitchYawCalculator.h 在大项目的 include 路径下
+#include "BallisticPitchYawCalculator.h"
+#endif
 namespace hitcrt {
 
 namespace {
@@ -198,11 +202,17 @@ void GimbalController::generateReferenceTrajectoryLite(double& pitchGoal, double
     angleToCam = angleToCam - rotateDir * hitNumYaw * params.cycAngle;
 
     const double angleGoalPosBase = getAngleToGimbal(angleToCam, rCar, targetDistXZ);
-    pitchGoal = angleGoalPosBase + std::atan2(targetPosX, targetPosZ);
-
     const double distXZReal = targetDistXZ - std::cos(angleToCam) * rCar;
-    yawGoal = calculateFirePitchRad(armorY, distXZReal, params.flySpeed);
 
+#ifdef USE_EXTERNAL_BALLISTIC_CALCULATOR
+    // 集成模式
+    yawGoal = angleGoalPosBase + BallisticPitchYawCalculator::calcFireYaw(targetPosX, targetPosZ);
+    pitchGoal = BallisticPitchYawCalculator::calcFirePitch(armorY, distXZReal, params.flySpeed);
+#else
+    // 独立模式
+    yawGoal = angleGoalPosBase + calculateFireYawRad(targetPosX, targetPosZ);
+    pitchGoal = calculateFirePitchRad(armorY, distXZReal, params.flySpeed);
+#endif
     const double targetHeight = armorY;  // Y速度不稳，不用于预测
     const double targetDistAll = std::hypot(targetDistXZ, targetHeight);
     dist = targetDistAll;
@@ -215,11 +225,15 @@ void GimbalController::generateReferenceTrajectoryLite(double& pitchGoal, double
     const double targetPosZ = params.posZ + params.spdZ * (flyTime);
     const double targetDistXZ = std::hypot(targetPosX, targetPosZ);
     const double targetDistAll = std::hypot(targetDistXZ, targetPosY);
-
-    pitchGoal = calculateFireYawRad(targetPosX, targetPosZ);
-
-    yawGoal = calculateFirePitchRad(targetPosY, targetDistXZ, params.flySpeed);
-
+#ifdef USE_EXTERNAL_BALLISTIC_CALCULATOR
+    // 集成模式
+    yawGoal = BallisticPitchYawCalculator::calcFireYaw(targetPosX, targetPosZ);
+    pitchGoal = BallisticPitchYawCalculator::calcFirePitch(targetPosY, targetDistXZ, params.flySpeed);
+#else
+    // 独立模式
+    yawGoal = calculateFireYawRad(targetPosX, targetPosZ);
+    pitchGoal = calculateFirePitchRad(targetPosY, targetDistXZ, params.flySpeed);
+#endif
     dist = targetDistAll;
 }
 /**
@@ -253,7 +267,14 @@ void GimbalController::generateReferenceTrajectory(TinyMatrix& xRefOutYaw, TinyM
         angleGoalSpeed -=
             (params.posX * params.spdZ - params.posZ * params.spdX) / (distToTargetArmor * distToTargetArmor);
 
-        const double angleGoalPosFinal = angleGoalPosBase + std::atan2(targetPosX, targetPosZ);
+#ifdef USE_EXTERNAL_BALLISTIC_CALCULATOR
+        // 集成模式
+        const double angleGoalPosFinal =
+            angleGoalPosBase + BallisticPitchYawCalculator::calcFireYaw(targetPosX, targetPosZ);
+#else
+        // 独立模式
+        const double angleGoalPosFinal = angleGoalPosBase + calculateFireYawRad(targetPosX, targetPosZ);
+#endif
 
         if (i == 0) {
             lastYaw = angleGoalPosFinal;
@@ -263,7 +284,8 @@ void GimbalController::generateReferenceTrajectory(TinyMatrix& xRefOutYaw, TinyM
             xRefOutYaw(0, i) = currentYaw;
             lastYaw = currentYaw;
         }
-        xRefOutYaw(1, i) = angleGoalSpeed;
+        xRefOutYaw(1, i) =
+            angleGoalSpeed;  //有一说一这个也得改(考虑枪管是否偏离yaw轴线)，但是影响不大，随他去吧
     }
 
     for (int i = 0; i < m_pitchHorizon; ++i) {
@@ -286,9 +308,17 @@ void GimbalController::generateReferenceTrajectory(TinyMatrix& xRefOutYaw, TinyM
         const double targetDistAll = std::hypot(targetDistXZ, targetHeight);
         const double angleGoalSpeed = velocityProjectionTerm / (targetDistAll * targetDistAll);
 
+#ifdef USE_EXTERNAL_BALLISTIC_CALCULATOR
+        // 集成模式
+        const double angleGoalPosFinal =
+            BallisticPitchYawCalculator::calcFirePitch(armorY, distXZReal, params.flySpeed);
+#else
+        // 独立模式
         const double angleGoalPosFinal = calculateFirePitchRad(armorY, distXZReal, params.flySpeed);
+#endif
         xRefOutPitch(0, i) = angleGoalPosFinal;
-        xRefOutPitch(1, i) = angleGoalSpeed;
+        xRefOutPitch(1, i) =
+            angleGoalSpeed;  //有一说一这个也得改(考虑枪管是否偏离yaw轴线)，但是影响不大，随他去吧
     }
 }
 
@@ -307,7 +337,13 @@ void GimbalController::generateReferenceTrajectory(TinyMatrix& xRefOutYaw, TinyM
         const double targetDistXZ = std::hypot(targetPosX, targetPosZ);
         const double velocityProjectionTerm = (targetPosX * params.spdZ - targetPosZ * params.spdX);
         const double angleGoalSpeed = -1.0 * velocityProjectionTerm / (targetDistXZ * targetDistXZ);
-        const double angleGoalPosFinal = std::atan2(targetPosX, targetPosZ);
+#ifdef USE_EXTERNAL_BALLISTIC_CALCULATOR
+        // 集成模式
+        const double angleGoalPosFinal = BallisticPitchYawCalculator::calcFireYaw(targetPosX, targetPosZ);
+#else
+        // 独立模式
+        const double angleGoalPosFinal = calculateFireYawRad(targetPosX, targetPosZ);
+#endif
 
         if (i == 0) {
             lastYaw = angleGoalPosFinal;
@@ -330,8 +366,14 @@ void GimbalController::generateReferenceTrajectory(TinyMatrix& xRefOutYaw, TinyM
         const double velocityProjectionTerm = (targetDistXZ * params.spdY - targetHeight * targetSpdHRZ);
         const double targetDistAll = std::hypot(targetDistXZ, targetHeight);
         const double angleGoalSpeed = velocityProjectionTerm / (targetDistAll * targetDistAll);
+#ifdef USE_EXTERNAL_BALLISTIC_CALCULATOR
+        // 集成模式
+        const double angleGoalPosFinal =
+            BallisticPitchYawCalculator::calcFirePitch(targetHeight, targetDistXZ, params.flySpeed);
+#else
+        // 独立模式
         const double angleGoalPosFinal = calculateFirePitchRad(targetHeight, targetDistXZ, params.flySpeed);
-
+#endif
         xRefOutPitch(0, i) = angleGoalPosFinal;
         xRefOutPitch(1, i) = angleGoalSpeed;
     }
@@ -450,7 +492,8 @@ double GimbalController::calculateFlyTimeNorm(const TargetParams& params, double
     }
     return params.dist / params.flySpeed;  // 返回无解时的估算值
 }
-
+// 只有在独立模式下才编译这些函数的定义
+#ifndef USE_EXTERNAL_BALLISTIC_CALCULATOR
 /**
  * @brief calculateFirePitchRad implementation
  * @author hitcrt (hitcrt@xxx.com)
@@ -476,7 +519,7 @@ double GimbalController::calculateFirePitchRad(double y, double dist, double fly
  * @author hitcrt (hitcrt@xxx.com)
  */
 double GimbalController::calculateFireYawRad(double x, double z) { return std::atan2(x, z); }
-
+#endif
 /**
  * @brief fixAngle implementation
  * @author hitcrt (hitcrt@xxx.com)
