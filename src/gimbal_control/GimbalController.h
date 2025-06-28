@@ -18,6 +18,7 @@
 #include <chrono>
 #include <memory>
 #include <stdexcept>
+
 #include "TinyMpcSolver.h"
 
 namespace hitcrt {
@@ -28,33 +29,32 @@ namespace hitcrt {
  */
 struct TargetParamsSpin {
     // --- 输入参数 ---
-    double rCar;          ///< 当前装甲板所在圆周半径 (m)
-    double rCarNext;      ///< 下一个装甲板所在圆周半径 (m)
-    double deltaYNext;    ///< 下一个装甲板与当前装甲板的高度差 (m)
-    double rotateSpeed;   ///< 旋转角速度 (rad/s)
-    double posX, spdX;    ///< 目标位置X, 速度X (世界系)
-    double posY, spdY;    ///< 目标位置Y, 速度Y (世界系)
-    double posZ, spdZ;    ///< 目标位置Z, 速度Z (世界系)
-    double posYaw;        ///< 目标姿态Yaw (世界系, rad)
-    double cycAngle;      ///< 装甲板之间的角度差 (rad)
-    double flySpeed;      ///< 弹速 (m/s)
-    double actionTime;    ///< 动作延迟 (例如：发弹延迟) (s)
-    bool isLargeArmor;    ///< 是否为大装甲板
+    double rCar;         ///< 当前装甲板所在圆周半径 (m)
+    double rCarNext;     ///< 下一个装甲板所在圆周半径 (m)
+    double deltaYNext;   ///< 下一个装甲板与当前装甲板的高度差 (m)
+    double rotateSpeed;  ///< 旋转角速度 (rad/s)
+    double posX, spdX;   ///< 目标位置X, 速度X (世界系)
+    double posY, spdY;   ///< 目标位置Y, 速度Y (世界系)
+    double posZ, spdZ;   ///< 目标位置Z, 速度Z (世界系)
+    double posYaw;       ///< 目标姿态Yaw (世界系, rad)
+    double cycAngle;     ///< 装甲板之间的角度差 (rad)
+    double flySpeed;     ///< 弹速 (m/s)
+    double actionTime;   ///< 动作延迟 (例如：发弹延迟) (s)
+    bool isLargeArmor;   ///< 是否为大装甲板
 
     // --- 派生计算参数 ---
-    double dist;          ///< 目标在XZ平面的距离 (m)
-    double linearSpeed;   ///< 旋转线速度 (m/s)
-    double yawToCam;      ///< 目标车中心-相机-目标装甲板 连线的夹角 (rad)
-    double rCarMean;      ///< 装甲板半径均值，用于粗略计算 (m)
+    double dist;         ///< 目标在XZ平面的距离 (m)
+    double linearSpeed;  ///< 旋转线速度 (m/s)
+    double yawToCam;     ///< 目标车中心-相机-目标装甲板 连线的夹角 (rad)
+    double rCarMean;     ///< 装甲板半径均值，用于粗略计算 (m)
 
     /**
      * @brief 带参构造函数，进行输入验证和自动计算。
      * @throw std::invalid_argument 如果输入参数不符合物理或逻辑约束。
      */
-    TargetParamsSpin(double rCar, double rCarNext, double deltaYNext, double rotateSpeed,
-                     double posX, double spdX, double posY, double spdY, double posZ, double spdZ,
-                     double posYaw, double cycAngle, double flySpeed, double actionTime,
-                     bool isLargeArmor);
+    TargetParamsSpin(double rCar, double rCarNext, double deltaYNext, double rotateSpeed, double posX,
+                     double spdX, double posY, double spdY, double posZ, double spdZ, double posYaw,
+                     double cycAngle, double flySpeed, double actionTime, bool isLargeArmor);
 };
 
 /**
@@ -85,22 +85,22 @@ struct TargetParams {
  * @brief 用于从GimbalController返回控制结果的结构体
  */
 struct ControlOutput {
-    double positionGoalPitch;   ///< Pitch轴当前时刻的参考位置 (rad)
-    double velocityGoalPitch;   ///< Pitch轴当前时刻的参考速度 (rad/s)
-    double positionPredPitch;   ///< MPC预测的下一时刻(k+1)的Pitch位置 (rad)
-    double velocityPredPitch;   ///< MPC预测的下一时刻(k+1)的Pitch速度 (rad/s)
-    double accelerationPitch;   ///< MPC计算的当前时刻(k)的最优Pitch加速度 (rad/s^2)
-    int iterationsPitch;        ///< Pitch轴MPC求解迭代次数
+    double positionGoalPitch;  ///< Pitch轴当前时刻的参考位置 (rad)
+    double velocityGoalPitch;  ///< Pitch轴当前时刻的参考速度 (rad/s)
+    double positionPredPitch;  ///< MPC预测的下一时刻(k+1)的Pitch位置 (rad)
+    double velocityPredPitch;  ///< MPC预测的下一时刻(k+1)的Pitch速度 (rad/s)
+    double accelerationPitch;  ///< MPC计算的当前时刻(k)的最优Pitch加速度 (rad/s^2)
+    int iterationsPitch;       ///< Pitch轴MPC求解迭代次数
 
-    double positionGoalYaw;     ///< Yaw轴当前时刻的参考位置 (rad)
-    double velocityGoalYaw;     ///< Yaw轴当前时刻的参考速度 (rad/s)
-    double positionPredYaw;     ///< MPC预测的下一时刻(k+1)的Yaw位置 (rad)
-    double velocityPredYaw;     ///< MPC预测的下一时刻(k+1)的Yaw速度 (rad/s)
-    double accelerationYaw;     ///< MPC计算的当前时刻(k)的最优Yaw加速度 (rad/s^2)
-    int iterationsYaw;          ///< Yaw轴MPC求解迭代次数
+    double positionGoalYaw;  ///< Yaw轴当前时刻的参考位置 (rad)
+    double velocityGoalYaw;  ///< Yaw轴当前时刻的参考速度 (rad/s)
+    double positionPredYaw;  ///< MPC预测的下一时刻(k+1)的Yaw位置 (rad)
+    double velocityPredYaw;  ///< MPC预测的下一时刻(k+1)的Yaw速度 (rad/s)
+    double accelerationYaw;  ///< MPC计算的当前时刻(k)的最优Yaw加速度 (rad/s^2)
+    int iterationsYaw;       ///< Yaw轴MPC求解迭代次数
 
-    bool shootFlag;             ///< 开火决策标志
-    double solveTimeMs;         ///< MPC求解总耗时 (ms)
+    bool shootFlag;      ///< 开火决策标志
+    double solveTimeMs;  ///< MPC求解总耗时 (ms)
 };
 
 /**
@@ -109,7 +109,7 @@ struct ControlOutput {
  *          用于计算云台的最优控制指令。
  */
 class GimbalController {
-public:
+   public:
     /**
      * @brief 构造函数，初始化两个MPC求解器 (Yaw & Pitch)
      * @param yawHorizon        Yaw轴预测时域
@@ -132,14 +132,13 @@ public:
      * @param pitchUMaxVec      Pitch轴控制量上限向量 (维度: s_PITCH_INPUTS)
      * @author hitcrt (hitcrt@xxx.com)
      */
-    GimbalController(int yawHorizon, double yawDtSolve, int pitchHorizon, double pitchDtSolve,
-                     double yawRho, double pitchRho, const Eigen::VectorXd& yawQDiag,
-                     const Eigen::VectorXd& yawRDiag, const Eigen::VectorXd& yawXMinVec,
-                     const Eigen::VectorXd& yawXMaxVec, const Eigen::VectorXd& yawUMinVec,
-                     const Eigen::VectorXd& yawUMaxVec, const Eigen::VectorXd& pitchQDiag,
-                     const Eigen::VectorXd& pitchRDiag, const Eigen::VectorXd& pitchXMinVec,
-                     const Eigen::VectorXd& pitchXMaxVec, const Eigen::VectorXd& pitchUMinVec,
-                     const Eigen::VectorXd& pitchUMaxVec);
+    GimbalController(int yawHorizon, double yawDtSolve, int pitchHorizon, double pitchDtSolve, double yawRho,
+                     double pitchRho, const Eigen::VectorXd& yawQDiag, const Eigen::VectorXd& yawRDiag,
+                     const Eigen::VectorXd& yawXMinVec, const Eigen::VectorXd& yawXMaxVec,
+                     const Eigen::VectorXd& yawUMinVec, const Eigen::VectorXd& yawUMaxVec,
+                     const Eigen::VectorXd& pitchQDiag, const Eigen::VectorXd& pitchRDiag,
+                     const Eigen::VectorXd& pitchXMinVec, const Eigen::VectorXd& pitchXMaxVec,
+                     const Eigen::VectorXd& pitchUMinVec, const Eigen::VectorXd& pitchUMaxVec);
 
     ~GimbalController() = default;
 
@@ -190,7 +189,7 @@ public:
             shootFlag = calculateShootFlag(yawSolution.x, xRefYaw, pitchSolution.x, xRefPitch, params);
         } else {
             // 非旋转目标，可以根据误差决定是否开火，此处简化为不开火
-            shootFlag = false; 
+            shootFlag = false;
         }
 
         auto endTime = std::chrono::high_resolution_clock::now();
@@ -217,7 +216,29 @@ public:
         return output;
     }
 
-private:
+    /**
+     * @brief 为旋转目标生成目标位置(第一个点)
+     * @param[out] pitchGoal Pitch轴的目标位置
+     * @param[out] yawGoal Yaw轴的目标位置
+     * @param[out] dist 目标的距离
+     * @param[in] params 旋转目标的参数
+     * @author hitcrt (hitcrt@xxx.com)
+     */
+    void generateReferenceTrajectoryLite(double& pitchGoal, double& yawGoal, double& dist,
+                                         const TargetParamsSpin& params);
+
+    /**
+     * @brief 为非旋转目标生成目标位置(第一个点)
+     * @param[out] pitchGoal Pitch轴的目标位置
+     * @param[out] yawGoal Yaw轴的目标位置
+     * @param[out] dist 目标的距离
+     * @param[in] params 非旋转目标的参数
+     * @author hitcrt (hitcrt@xxx.com)
+     */
+    void generateReferenceTrajectoryLite(double& pitchGoal, double& yawGoal, double& dist,
+                                         const TargetParams& params);
+
+   private:
     // --- 私有成员变量 ---
     std::unique_ptr<TinyMpcSolver> m_yawSolverPtr;    ///< Yaw轴MPC求解器
     std::unique_ptr<TinyMpcSolver> m_pitchSolverPtr;  ///< Pitch轴MPC求解器
@@ -229,10 +250,10 @@ private:
     static constexpr int s_PITCH_INPUTS = 1;
 
     // MPC配置参数 (由构造函数初始化)
-    const int m_yawHorizon;      ///< Yaw轴预测时域
-    const double m_yawDtSolve;   ///< Yaw轴求解时间步长
-    const int m_pitchHorizon;    ///< Pitch轴预测时域
-    const double m_pitchDtSolve; ///< Pitch轴求解时间步长
+    const int m_yawHorizon;       ///< Yaw轴预测时域
+    const double m_yawDtSolve;    ///< Yaw轴求解时间步长
+    const int m_pitchHorizon;     ///< Pitch轴预测时域
+    const double m_pitchDtSolve;  ///< Pitch轴求解时间步长
 
     // --- 私有方法 ---
     /**
@@ -297,7 +318,7 @@ private:
      * @author hitcrt (hitcrt@xxx.com)
      */
     double calculateFirePitchRad(double y, double dist, double flySpeed);
-    
+
     /**
      * @brief 计算目标Yaw角度
      * @param x 目标X坐标 (m)

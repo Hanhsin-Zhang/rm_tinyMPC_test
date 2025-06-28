@@ -38,11 +38,10 @@ double getAngleToGimbal(double angleToCam, double r, double d) {
  * @brief TargetParamsSpin 构造函数
  * @author hitcrt (hitcrt@xxx.com)
  */
-TargetParamsSpin::TargetParamsSpin(double _rCar, double _rCarNext, double _deltaYNext,
-                                   double _rotateSpeed, double _posX, double _spdX, double _posY,
-                                   double _spdY, double _posZ, double _spdZ, double _posYaw,
-                                   double _cycAngle, double _flySpeed, double _actionTime,
-                                   bool _isLargeArmor)
+TargetParamsSpin::TargetParamsSpin(double _rCar, double _rCarNext, double _deltaYNext, double _rotateSpeed,
+                                   double _posX, double _spdX, double _posY, double _spdY, double _posZ,
+                                   double _spdZ, double _posYaw, double _cycAngle, double _flySpeed,
+                                   double _actionTime, bool _isLargeArmor)
     : rCar(_rCar),
       rCarNext(_rCarNext),
       deltaYNext(_deltaYNext),
@@ -82,8 +81,8 @@ TargetParamsSpin::TargetParamsSpin(double _rCar, double _rCarNext, double _delta
  * @brief TargetParams 构造函数
  * @author hitcrt (hitcrt@xxx.com)
  */
-TargetParams::TargetParams(double _posX, double _spdX, double _posY, double _spdY, double _posZ,
-                           double _spdZ, double _flySpeed, double _actionTime, bool _isLargeArmor)
+TargetParams::TargetParams(double _posX, double _spdX, double _posY, double _spdY, double _posZ, double _spdZ,
+                           double _flySpeed, double _actionTime, bool _isLargeArmor)
     : posX(_posX),
       spdX(_spdX),
       posY(_posY),
@@ -107,14 +106,14 @@ TargetParams::TargetParams(double _posX, double _spdX, double _posY, double _spd
  * @brief GimbalController 构造函数
  * @author hitcrt (hitcrt@xxx.com)
  */
-GimbalController::GimbalController(
-    int yawHorizon, double yawDtSolve, int pitchHorizon, double pitchDtSolve, double yawRho,
-    double pitchRho, const Eigen::VectorXd& yawQDiag, const Eigen::VectorXd& yawRDiag,
-    const Eigen::VectorXd& yawXMinVec, const Eigen::VectorXd& yawXMaxVec,
-    const Eigen::VectorXd& yawUMinVec, const Eigen::VectorXd& yawUMaxVec,
-    const Eigen::VectorXd& pitchQDiag, const Eigen::VectorXd& pitchRDiag,
-    const Eigen::VectorXd& pitchXMinVec, const Eigen::VectorXd& pitchXMaxVec,
-    const Eigen::VectorXd& pitchUMinVec, const Eigen::VectorXd& pitchUMaxVec)
+GimbalController::GimbalController(int yawHorizon, double yawDtSolve, int pitchHorizon, double pitchDtSolve,
+                                   double yawRho, double pitchRho, const Eigen::VectorXd& yawQDiag,
+                                   const Eigen::VectorXd& yawRDiag, const Eigen::VectorXd& yawXMinVec,
+                                   const Eigen::VectorXd& yawXMaxVec, const Eigen::VectorXd& yawUMinVec,
+                                   const Eigen::VectorXd& yawUMaxVec, const Eigen::VectorXd& pitchQDiag,
+                                   const Eigen::VectorXd& pitchRDiag, const Eigen::VectorXd& pitchXMinVec,
+                                   const Eigen::VectorXd& pitchXMaxVec, const Eigen::VectorXd& pitchUMinVec,
+                                   const Eigen::VectorXd& pitchUMaxVec)
     : m_yawHorizon(yawHorizon),
       m_yawDtSolve(yawDtSolve),
       m_pitchHorizon(pitchHorizon),
@@ -160,17 +159,17 @@ GimbalController::GimbalController(
 
     // 3. 初始化求解器
     try {
-        m_yawSolverPtr = std::make_unique<TinyMpcSolver>(adynYaw, bdynYaw, QYaw, RYaw, xMinYaw,
-                                                         xMaxYaw, uMinYaw, uMaxYaw, s_YAW_STATES,
-                                                         s_YAW_INPUTS, m_yawHorizon, yawRho, false);
+        m_yawSolverPtr =
+            std::make_unique<TinyMpcSolver>(adynYaw, bdynYaw, QYaw, RYaw, xMinYaw, xMaxYaw, uMinYaw, uMaxYaw,
+                                            s_YAW_STATES, s_YAW_INPUTS, m_yawHorizon, yawRho, false);
     } catch (const std::invalid_argument& e) {
         std::cerr << "ERROR: Failed to initialize Yaw GimbalController: " << e.what() << std::endl;
         throw;
     }
     try {
-        m_pitchSolverPtr = std::make_unique<TinyMpcSolver>(
-            adynPitch, bdynPitch, QPitch, RPitch, xMinPitch, xMaxPitch, uMinPitch, uMaxPitch,
-            s_PITCH_STATES, s_PITCH_INPUTS, m_pitchHorizon, pitchRho, false);
+        m_pitchSolverPtr = std::make_unique<TinyMpcSolver>(adynPitch, bdynPitch, QPitch, RPitch, xMinPitch,
+                                                           xMaxPitch, uMinPitch, uMaxPitch, s_PITCH_STATES,
+                                                           s_PITCH_INPUTS, m_pitchHorizon, pitchRho, false);
     } catch (const std::invalid_argument& e) {
         std::cerr << "ERROR: Failed to initialize Pitch GimbalController: " << e.what() << std::endl;
         throw;
@@ -178,18 +177,56 @@ GimbalController::GimbalController(
 }
 
 // 显式实例化模板函数，使其定义可以保留在头文件中
-template ControlOutput GimbalController::update<hitcrt::TargetParamsSpin>(
-    const hitcrt::TargetParamsSpin&, double, double, double, double);
-template ControlOutput GimbalController::update<hitcrt::TargetParams>(const hitcrt::TargetParams&,
-                                                                       double, double, double,
-                                                                       double);
+template ControlOutput GimbalController::update<hitcrt::TargetParamsSpin>(const hitcrt::TargetParamsSpin&,
+                                                                          double, double, double, double);
+template ControlOutput GimbalController::update<hitcrt::TargetParams>(const hitcrt::TargetParams&, double,
+                                                                      double, double, double);
+void GimbalController::generateReferenceTrajectoryLite(double& pitchGoal, double& yawGoal, double& dist,
+                                                       const TargetParamsSpin& params) {
+    const int rotateDir = (params.rotateSpeed > 0) - (params.rotateSpeed < 0);
+    const double cycAngleHalf = 0.5 * params.cycAngle;
 
+    double flyTime = calculateFlyTimeSpin(params, 0);
+    const double targetPosX = params.posX + params.spdX * (flyTime);
+    const double targetPosZ = params.posZ + params.spdZ * (flyTime);
+    const double targetDistXZ = std::hypot(targetPosX, targetPosZ);
+
+    double angleToCam = params.yawToCam + params.rotateSpeed * (flyTime);
+    const int hitNumYaw = std::abs(std::floor((rotateDir * angleToCam + cycAngleHalf) / params.cycAngle));
+    const double rCar = (hitNumYaw & 1) ? params.rCarNext : params.rCar;
+    const double armorY = (hitNumYaw & 1) ? (params.posY + params.deltaYNext) : params.posY;
+    angleToCam = angleToCam - rotateDir * hitNumYaw * params.cycAngle;
+
+    const double angleGoalPosBase = getAngleToGimbal(angleToCam, rCar, targetDistXZ);
+    pitchGoal = angleGoalPosBase + std::atan2(targetPosX, targetPosZ);
+
+    const double distXZReal = targetDistXZ - std::cos(angleToCam) * rCar;
+    yawGoal = calculateFirePitchRad(armorY, distXZReal, params.flySpeed);
+
+    const double targetHeight = armorY;  // Y速度不稳，不用于预测
+    const double targetDistAll = std::hypot(targetDistXZ, targetHeight);
+    dist = targetDistAll;
+}
+void GimbalController::generateReferenceTrajectoryLite(double& pitchGoal, double& yawGoal, double& dist,
+                                                       const TargetParams& params) {
+    double flyTime = calculateFlyTimeNorm(params, 0);
+    const double targetPosX = params.posX + params.spdX * (flyTime);
+    const double targetPosY = params.posY + params.spdY * (flyTime);
+    const double targetPosZ = params.posZ + params.spdZ * (flyTime);
+    const double targetDistXZ = std::hypot(targetPosX, targetPosZ);
+    const double targetDistAll = std::hypot(targetDistXZ, targetPosY);
+
+    pitchGoal = calculateFireYawRad(targetPosX, targetPosZ);
+
+    yawGoal = calculateFirePitchRad(targetPosY, targetDistXZ, params.flySpeed);
+
+    dist = targetDistAll;
+}
 /**
  * @brief generateReferenceTrajectory for TargetParamsSpin
  * @author hitcrt (hitcrt@xxx.com)
  */
-void GimbalController::generateReferenceTrajectory(TinyMatrix& xRefOutYaw,
-                                                   TinyMatrix& xRefOutPitch,
+void GimbalController::generateReferenceTrajectory(TinyMatrix& xRefOutYaw, TinyMatrix& xRefOutPitch,
                                                    const TargetParamsSpin& params) {
     const int rotateDir = (params.rotateSpeed > 0) - (params.rotateSpeed < 0);
     const double cycAngleHalf = 0.5 * params.cycAngle;
@@ -203,20 +240,18 @@ void GimbalController::generateReferenceTrajectory(TinyMatrix& xRefOutYaw,
         const double targetDistXZ = std::hypot(targetPosX, targetPosZ);
 
         double angleToCam = params.yawToCam + params.rotateSpeed * (flyTime + t);
-        const int hitNumYaw =
-            std::abs(std::floor((rotateDir * angleToCam + cycAngleHalf) / params.cycAngle));
+        const int hitNumYaw = std::abs(std::floor((rotateDir * angleToCam + cycAngleHalf) / params.cycAngle));
         const double rCar = (hitNumYaw & 1) ? params.rCarNext : params.rCar;
+        const double linearSpeed = rCar * params.rotateSpeed;
         angleToCam = angleToCam - rotateDir * hitNumYaw * params.cycAngle;
         const double angleGoalPosBase = getAngleToGimbal(angleToCam, rCar, targetDistXZ);
         const double distToTargetArmorSq =
-            rCar * rCar + targetDistXZ * targetDistXZ +
-            2 * rCar * targetDistXZ * std::cos(angleToCam);
+            rCar * rCar + targetDistXZ * targetDistXZ + 2 * rCar * targetDistXZ * std::cos(angleToCam);
         const double distToTargetArmor = std::sqrt(distToTargetArmorSq);
 
-        double angleGoalSpeed =
-            params.linearSpeed * std::cos(angleToCam) / distToTargetArmor;
-        angleGoalSpeed -= (params.posX * params.spdZ - params.posZ * params.spdX) /
-                          (distToTargetArmor * distToTargetArmor);
+        double angleGoalSpeed = linearSpeed * std::cos(angleToCam) / distToTargetArmor;
+        angleGoalSpeed -=
+            (params.posX * params.spdZ - params.posZ * params.spdX) / (distToTargetArmor * distToTargetArmor);
 
         const double angleGoalPosFinal = angleGoalPosBase + std::atan2(targetPosX, targetPosZ);
 
@@ -242,15 +277,15 @@ void GimbalController::generateReferenceTrajectory(TinyMatrix& xRefOutYaw,
         const int hitNumYaw = std::abs(std::floor((rotateDir * angleToCam + cycAngleHalf) / params.cycAngle));
         angleToCam = angleToCam - rotateDir * hitNumYaw * params.cycAngle;
         const double rCar = (hitNumYaw & 1) ? params.rCarNext : params.rCar;
-        
+
         const double armorY = (hitNumYaw & 1) ? (params.posY + params.deltaYNext) : params.posY;
         const double distXZReal = targetDistXZ - std::cos(angleToCam) * rCar;
-        const double targetHeight = params.posY; // Y速度不稳，不用于预测
+        const double targetHeight = armorY;  // Y速度不稳，不用于预测
         const double targetSpdHRZ = (targetPosX * params.spdZ + targetPosZ * params.spdX) / targetDistXZ;
         const double velocityProjectionTerm = (-targetHeight * targetSpdHRZ);
         const double targetDistAll = std::hypot(targetDistXZ, targetHeight);
         const double angleGoalSpeed = velocityProjectionTerm / (targetDistAll * targetDistAll);
-        
+
         const double angleGoalPosFinal = calculateFirePitchRad(armorY, distXZReal, params.flySpeed);
         xRefOutPitch(0, i) = angleGoalPosFinal;
         xRefOutPitch(1, i) = angleGoalSpeed;
@@ -261,8 +296,7 @@ void GimbalController::generateReferenceTrajectory(TinyMatrix& xRefOutYaw,
  * @brief generateReferenceTrajectory for TargetParams
  * @author hitcrt (hitcrt@xxx.com)
  */
-void GimbalController::generateReferenceTrajectory(TinyMatrix& xRefOutYaw,
-                                                   TinyMatrix& xRefOutPitch,
+void GimbalController::generateReferenceTrajectory(TinyMatrix& xRefOutYaw, TinyMatrix& xRefOutPitch,
                                                    const TargetParams& params) {
     double lastYaw = 0.0;
     for (int i = 0; i < m_yawHorizon; ++i) {
@@ -271,8 +305,7 @@ void GimbalController::generateReferenceTrajectory(TinyMatrix& xRefOutYaw,
         const double targetPosX = params.posX + params.spdX * (t + flyTime);
         const double targetPosZ = params.posZ + params.spdZ * (t + flyTime);
         const double targetDistXZ = std::hypot(targetPosX, targetPosZ);
-        const double velocityProjectionTerm =
-            (targetPosX * params.spdZ - targetPosZ * params.spdX);
+        const double velocityProjectionTerm = (targetPosX * params.spdZ - targetPosZ * params.spdX);
         const double angleGoalSpeed = -1.0 * velocityProjectionTerm / (targetDistXZ * targetDistXZ);
         const double angleGoalPosFinal = std::atan2(targetPosX, targetPosZ);
 
@@ -293,14 +326,12 @@ void GimbalController::generateReferenceTrajectory(TinyMatrix& xRefOutYaw,
         const double targetPosZ = params.posZ + params.spdZ * (t + flyTime);
         const double targetDistXZ = std::hypot(targetPosX, targetPosZ);
         const double targetHeight = params.posY + params.spdY * (t + flyTime);
-        const double targetSpdHRZ =
-            (targetPosX * params.spdX + targetPosZ * params.spdZ) / targetDistXZ;
-        const double velocityProjectionTerm =
-            (targetDistXZ * params.spdY - targetHeight * targetSpdHRZ);
+        const double targetSpdHRZ = (targetPosX * params.spdX + targetPosZ * params.spdZ) / targetDistXZ;
+        const double velocityProjectionTerm = (targetDistXZ * params.spdY - targetHeight * targetSpdHRZ);
         const double targetDistAll = std::hypot(targetDistXZ, targetHeight);
         const double angleGoalSpeed = velocityProjectionTerm / (targetDistAll * targetDistAll);
         const double angleGoalPosFinal = calculateFirePitchRad(targetHeight, targetDistXZ, params.flySpeed);
-        
+
         xRefOutPitch(0, i) = angleGoalPosFinal;
         xRefOutPitch(1, i) = angleGoalSpeed;
     }
@@ -318,15 +349,12 @@ bool GimbalController::calculateShootFlag(const TinyMatrix& predictedTrajectoryY
     constexpr double LARGE_ARMOR_WIDTH = 0.230;
     constexpr double SMALL_ARMOR_WIDTH = 0.135;
 
-    double flyTime = calculateFlyTimeSpin(params, 0);
-    double timeToHit = params.actionTime + flyTime;
-
-    if (timeToHit > (m_yawHorizon - 1) * m_yawDtSolve || timeToHit < 0) {
-        std::cout<<"timeToHit is too long to predict!"<<std::endl;
+    if (params.actionTime > (m_yawHorizon - 1) * m_yawDtSolve || params.actionTime < 0) {
+        std::cout << "timeToHit is too long to predict!" << std::endl;
         return false;
     }
 
-    int kPred = static_cast<int>(std::round(timeToHit / m_yawDtSolve));
+    int kPred = static_cast<int>(std::round(params.actionTime / m_yawDtSolve));
     kPred = std::max(0, std::min(kPred, m_yawHorizon - 1));
 
     const double predictedPos = predictedTrajectoryYaw(0, kPred);
@@ -334,9 +362,9 @@ bool GimbalController::calculateShootFlag(const TinyMatrix& predictedTrajectoryY
     const double positionError = std::abs(predictedPos - referencePos);
 
     const int rotateDir = (params.rotateSpeed > 0) - (params.rotateSpeed < 0);
-    double angleToCam = params.yawToCam + params.rotateSpeed * timeToHit;
-    int hitNumYaw = std::abs(
-        std::floor((rotateDir * angleToCam + (0.5 * params.cycAngle)) / params.cycAngle));
+    double angleToCam = params.yawToCam + params.rotateSpeed * params.actionTime;
+    int hitNumYaw =
+        std::abs(std::floor((rotateDir * angleToCam + (0.5 * params.cycAngle)) / params.cycAngle));
     angleToCam = angleToCam - rotateDir * hitNumYaw * params.cycAngle;
     const double rCar = (hitNumYaw % 2 == 1) ? params.rCarNext : params.rCar;
     double distToTargetArmor =
@@ -362,13 +390,13 @@ double GimbalController::calculateFlyTimeSpin(const TargetParamsSpin& params, do
     double a = (params.spdX * params.spdX + params.spdY * params.spdY + params.spdZ * params.spdZ -
                 params.flySpeed * params.flySpeed);
     double b = 2 * (targetPosX * params.spdX + targetPosY * params.spdY + targetPosZ * params.spdZ -
-                params.rCarMean * params.flySpeed * std::abs(params.rotateSpeed));
+                    params.rCarMean * params.flySpeed * std::abs(params.rotateSpeed));
     double c = targetPosX * targetPosX + targetPosY * targetPosY + targetPosZ * targetPosZ -
                params.rCarMean * params.rCarMean;
 
     double discriminant = b * b - 4 * a * c;
     if (discriminant < 0) {
-        return params.dist / params.flySpeed; // 返回无解时的估算值
+        return params.dist / params.flySpeed;  // 返回无解时的估算值
     }
 
     if (std::abs(a) < epsilon) {
@@ -384,7 +412,7 @@ double GimbalController::calculateFlyTimeSpin(const TargetParamsSpin& params, do
             return t2;
         }
     }
-    return params.dist / params.flySpeed; // 返回无解时的估算值
+    return params.dist / params.flySpeed;  // 返回无解时的估算值
 }
 
 /**
@@ -404,11 +432,11 @@ double GimbalController::calculateFlyTimeNorm(const TargetParams& params, double
 
     double discriminant = b * b - 4 * a * c;
     if (discriminant < 0) {
-        return params.dist / params.flySpeed; // 返回无解时的估算值
+        return params.dist / params.flySpeed;  // 返回无解时的估算值
     }
 
     if (std::abs(a) < epsilon) {
-       return (std::abs(b) < epsilon) ? (params.dist / params.flySpeed) : (-c / b);
+        return (std::abs(b) < epsilon) ? (params.dist / params.flySpeed) : (-c / b);
     } else {
         double sqrtDiscriminant = std::sqrt(discriminant);
         double t1 = (-b + sqrtDiscriminant) / (2 * a);
@@ -420,7 +448,7 @@ double GimbalController::calculateFlyTimeNorm(const TargetParams& params, double
             return t2;
         }
     }
-    return params.dist / params.flySpeed; // 返回无解时的估算值
+    return params.dist / params.flySpeed;  // 返回无解时的估算值
 }
 
 /**
@@ -447,9 +475,7 @@ double GimbalController::calculateFirePitchRad(double y, double dist, double fly
  * @brief calculateFireYawRad implementation
  * @author hitcrt (hitcrt@xxx.com)
  */
-double GimbalController::calculateFireYawRad(double x, double z) { 
-    return std::atan2(x, z); 
-}
+double GimbalController::calculateFireYawRad(double x, double z) { return std::atan2(x, z); }
 
 /**
  * @brief fixAngle implementation

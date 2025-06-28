@@ -52,8 +52,8 @@ int main(int argc, char* argv[]) {
 
     // ---- 1. 定义控制器参数 ----
     // Yaw轴参数
-    const int YAW_N_HORIZON = 30;
-    const double YAW_DT_SOLVE = 0.015;
+    const int YAW_N_HORIZON = 20;
+    const double YAW_DT_SOLVE = 0.008;
     const double YAW_RHO_VALUE = 5.0;
     Eigen::Vector2d yawQDiag;
     yawQDiag << 100000000.0, 0.001;
@@ -70,7 +70,7 @@ int main(int argc, char* argv[]) {
 
     // Pitch轴参数
     const int PITCH_N_HORIZON = 8;
-    const double PITCH_DT_SOLVE = 0.015;
+    const double PITCH_DT_SOLVE = 0.005;
     const double PITCH_RHO_VALUE = 5.0;
     Eigen::Vector2d pitchQDiag;
     pitchQDiag << 100000000.0, 0.001;
@@ -85,6 +85,7 @@ int main(int argc, char* argv[]) {
     Eigen::VectorXd pitchUMaxVec(1);
     pitchUMaxVec << 180.0;
 
+    
     // ---- 2. 初始化控制器 ----
     std::unique_ptr<GimbalController> gimbalControllerPtr;
     try {
@@ -109,12 +110,12 @@ int main(int argc, char* argv[]) {
     double rCar = 0.3;
     double rCarNext = 0.4;
     double deltaYNext = 0.1;
-    double rotateSpeed = 12.0;
+    double rotateSpeed = 6.0;
     double posX = -1.0;
     double spdX = 1.0;
     double posY = -0.1;
     double spdY = 0.1;
-    double posZ = 1.5;
+    double posZ = 3.5;
     double spdZ = 0.0;
     double posYaw = 0.0;
     double cycAngle = M_PI / 2.0;
@@ -137,14 +138,19 @@ int main(int argc, char* argv[]) {
 
     // ---- 4. 仿真循环 ----
     for (int iter = 0; iter < 400; ++iter) {
+        double yaw, pitch, dist;
         ControlOutput result;
         if (isSpin) {
             TargetParamsSpin targetParams(rCar, rCarNext, deltaYNext, rotateSpeed, posX, spdX, posY, spdY,
                                           posZ, spdZ, posYaw, cycAngle, flySpeed, actionTime, isLargeArmor);
+            gimbalControllerPtr->generateReferenceTrajectoryLite(yaw, pitch, dist, targetParams);
+            std::cout << "pitch = " << pitch << " yaw = " << yaw << " dist = " << dist << std::endl;
             result = gimbalControllerPtr->update(targetParams, currentYawState(0), currentYawState(1),
                                                  currentPitchState(0), currentPitchState(1));
         } else {
             TargetParams targetParams(posX, spdX, posY, spdY, posZ, spdZ, flySpeed, actionTime, isLargeArmor);
+            gimbalControllerPtr->generateReferenceTrajectoryLite(yaw, pitch, dist, targetParams);
+            std::cout << "pitch = " << pitch << " yaw = " << yaw << " dist = " << dist << std::endl;
             result = gimbalControllerPtr->update(targetParams, currentYawState(0), currentYawState(1),
                                                  currentPitchState(0), currentPitchState(1));
         }
